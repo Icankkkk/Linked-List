@@ -1,12 +1,7 @@
-
-#include <iostream>
-#include <string>
-
-using std::cout; using std::cin; using std::string;
+#include "Library.h"
 
 #ifndef LINKED_LIST
 #define LINKED_LIST
-#define newLine cout << '\n';
 
 // class node
 class Node {
@@ -20,11 +15,15 @@ public:         // akses modifier
 
 // fungsi untuk mencetak seluruh node
 void print_list(Node *n) {
+    short int data = 1;
+
+    cout << "\nData didalam list:\n";
     while (n != nullptr)    // jika pointer tidak = null, maka terus mencetak
     {
-        cout << n -> nim << ' ';
-        cout << n -> nama << ' ';
-        cout << n -> nilai << ' ';
+        cout << "Node ke-" << data++ << ":\n";
+        cout << "Nim\t: " << n -> nim << '\n';
+        cout << "Nama\t: " << n -> nama << '\n';
+        cout << "Nilai\t: " << n -> nilai << '\n';
         newLine;        // newline
         n = n->next;    // menunjuk n ke node next
     }
@@ -33,14 +32,14 @@ void print_list(Node *n) {
 
 // fungsi untuk mengisi data pada sebuah node
 void fill_data(Node *value) {
-    cout << "Input NIM\t: "; cin >> value -> nim;    // membaca atribut data (integer)
-    cout << "Input Nama\t: "; cin >> value -> nama;    // membaca atribut nama (string)
-    cout << "Input Nilai\t: "; cin >> value -> nilai;   // membaca atribut grade (char)
+    cout << "Inputkan NIM anda\t: "; cin >> value -> nim;    // membaca atribut data (integer)
+    cout << "Inputkan Nama anda\t: "; cin >> value -> nama;    // membaca atribut nama (string)
+    cout << "Inputkan Nilai anda\t: "; cin >> value -> nilai;   // membaca atribut grade (char)
 }
 
 // fungsi untuk tambah depan (head)
-void push_head(struct Node **head_ref) { //, int new_data, string new_nama, char new_grade ) {
-    struct Node *new_node = new Node(); // alokasi
+void push_head(Node **head_ref) { //, int new_data, string new_nama, char new_grade ) {
+    Node *new_node = new Node(); // alokasi
    
    /* new_node->data = new_data;
     new_node->nama = new_nama;
@@ -57,8 +56,8 @@ void push_head(struct Node **head_ref) { //, int new_data, string new_nama, char
 }
 
 // fungsi untuk tambah belakang
-void push_back(struct Node **head_ref) {
-    struct Node *new_node = new Node();
+void push_back(Node **head_ref) {
+    Node *new_node = new Node();
     Node *last = *head_ref;
     
     fill_data(new_node);
@@ -71,14 +70,14 @@ void push_back(struct Node **head_ref) {
 }
 
 // fungsi untuk tambah ditengah node (diantara head & back)
-void push_prev(struct Node *prev_ref) {
+void push_prev(Node *prev_ref) {
     if (prev_ref == nullptr)
     {
-        printf("node yang diberikan sebelumnya tidak boleh NULL");
+        printf("NULL");
         return;
     }
     // alokasi node baru
-    struct Node *new_node = new Node();
+    Node *new_node = new Node();
 
     // mengisi value
     fill_data(new_node);
@@ -86,11 +85,66 @@ void push_prev(struct Node *prev_ref) {
     prev_ref -> next = new_node; 
 }
 
+// fungsi untuk mengapus node sesuai posisi
+void deleteNode(Node **head_ref, short int &pos) {
+    // jika linkedlist kosong
+    if (*head_ref == nullptr)
+    return;
+    // store head node
+    Node *temp = *head_ref;
+    // memberikan posisi node sesuai input
+    cout << "posisi keberapa yang ingin di hapus ?\n"
+         << "key : "; cin >> pos;
+    // If head needs to be removed
+    if (pos == 0)
+    {
+        // change head
+        *head_ref = temp->next;
+        // free head lama
+        delete(temp);
+        return;
+    }
+    // Find previous node of the node to be deleted
+    for (int i = 0; temp != nullptr && i < pos - 1; i++)
+        temp = temp->next;
+        // If position is more than number of nodes
+        if (temp == nullptr || temp->next == nullptr)
+        return;
+    // Node temp->next is the node to be deleted
+    // Store pointer to the next of node to be deleted
+    Node *next = temp->next->next;
+    // Unlink the node from linked list
+    delete(temp->next);
+    // unlink the deleted node from list
+    temp->next = next;    
+}
+
+// fungsi untuk delete seluruh node atau list
+void deleteList(Node **head_ref) {
+    Node *current = *head_ref;
+    Node * next = nullptr;
+
+    while (current != nullptr)
+    {
+        next = current->next;
+        delete(current);
+        current = next;
+    }
+    *head_ref = nullptr;
+}
+
+// fungsi untuk exit
+void exit(string status) {
+    cout << "Keluar dari menu singly linked-list...\n";
+    sleep(2);
+    system("clear");
+}
+
 void switch_case() {
     
     Node *head = nullptr;   // deklarasi atau inisialisasi awal
-    short int pil;    // untuk switch case
- 
+    short int pil, posisi;    // untuk switch case
+
     /* alokasi 
     head = new Node();
 
@@ -99,27 +153,32 @@ void switch_case() {
     head -> nama = "dimas";
     head -> grade = 'A';
     head -> next = nullptr; */
-
-    do {
-        newLine;
-        cout << "1. push head\n"
+    system("clear");
+    cout << "SINGLY LINKED-LIST\n"
+             << "1. push head\n"
              << "2. push back\n"
              << "3. push prev\n"
              << "4. print\n"
-             << "5. exit\n\n"
-             << "Masukan pilihan\t: "; cin >> pil;
+             << "5. delete node\n"
+             << "6. delete list\n"
+             << "7. exit\n\n";
+    do {
+        
+        cout << "Masukan pilihan\t: "; cin >> pil;
 
         switch(pil) 
         {
-            case 1: push_head(&head); break;
-            case 2: push_back(&head); break;
-            case 3: push_prev(head); break;
-            case 4: print_list(head); break;
-            case 5: exit(0); break;
-            // jika submit selain 1-5
-            default: printf("Tidak ada didalam daftar!\n"); break;
+            case 1: push_head(&head); break;    // sisip depan
+            case 2: push_back(&head); break;    // sisip belakang
+            case 3: push_prev(head); break;     // sisip tengah
+            case 4: print_list(head); break;    // cetak list
+            case 5: deleteNode(&head, posisi); break;   // hapus node
+            case 6: deleteList(&head); break;   // hapus semua node
+            case 7: exit("keluar dari menu singly-list...\n"); break; // keluar program
+            // jika submit selain 1-6
+            default: printf("Tidak ada didalam daftar!\n\n"); break;
         }
-    } while(pil != 5); // looping
+    } while(pil != 7); // looping
 }
 
 #endif // !LINKED_LIST
